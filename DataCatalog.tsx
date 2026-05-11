@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
 import Papa from "papaparse";
 
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  TextField,
-  MenuItem,
-  Chip,
-  Button,
-  Stack,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 
 import AddIcon from "@mui/icons-material/Add";
 import StorageIcon from "@mui/icons-material/Storage";
