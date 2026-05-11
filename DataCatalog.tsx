@@ -12,9 +12,14 @@ import {
   MenuItem,
   Chip,
   Button,
+  Stack,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
+import StorageIcon from "@mui/icons-material/Storage";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import DnsIcon from "@mui/icons-material/Dns";
 
 import {
   DataGrid,
@@ -66,7 +71,7 @@ const columns: GridColDef[] = [
   },
   {
     field: "lastUpdated",
-    headerName: "Last Updated",
+    headerName: "Updated",
     flex: 1,
   },
   {
@@ -77,15 +82,43 @@ const columns: GridColDef[] = [
       <Chip
         label={params.value}
         size="small"
-        color={
-          params.value === "Fresh"
-            ? "success"
-            : params.value === "Warning"
-            ? "warning"
-            : "error"
-        }
+        sx={{
+          borderRadius: "8px",
+          fontWeight: 600,
+          backgroundColor:
+            params.value === "Fresh"
+              ? "#DCFCE7"
+              : "#FEF3C7",
+          color:
+            params.value === "Fresh"
+              ? "#166534"
+              : "#92400E",
+        }}
       />
     ),
+  },
+];
+
+const stats = [
+  {
+    title: "Total Datasets",
+    value: "1,248",
+    icon: <StorageIcon color="primary" />,
+  },
+  {
+    title: "Total Tables",
+    value: "5,678",
+    icon: <TableChartIcon color="success" />,
+  },
+  {
+    title: "Total Dashboards",
+    value: "234",
+    icon: <DashboardIcon color="warning" />,
+  },
+  {
+    title: "Data Sources",
+    value: "18",
+    icon: <DnsIcon color="info" />,
   },
 ];
 
@@ -107,7 +140,13 @@ const DataCatalogPage = () => {
   }, []);
 
   return (
-    <Box sx={{ p: 3, background: "#F8FAFC", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        backgroundColor: "#F8FAFC",
+        minHeight: "100vh",
+        p: 3,
+      }}
+    >
       {/* HEADER */}
       <Box
         display="flex"
@@ -117,7 +156,7 @@ const DataCatalogPage = () => {
       >
         <Box>
           <Typography
-            variant="h4"
+            variant="h5"
             fontWeight={700}
             color="#0F172A"
           >
@@ -126,9 +165,11 @@ const DataCatalogPage = () => {
 
           <Typography
             variant="body2"
-            color="text.secondary"
+            color="#64748B"
+            mt={0.5}
           >
-            Discover, explore and understand your data assets
+            Discover, explore and understand your
+            data assets
           </Typography>
         </Box>
 
@@ -136,8 +177,10 @@ const DataCatalogPage = () => {
           variant="contained"
           startIcon={<AddIcon />}
           sx={{
-            textTransform: "none",
             borderRadius: "10px",
+            textTransform: "none",
+            px: 2,
+            boxShadow: "none",
           }}
         >
           Add Dataset
@@ -146,46 +189,40 @@ const DataCatalogPage = () => {
 
       {/* STATS */}
       <Grid container spacing={2} mb={3}>
-        {[
-          {
-            title: "Total Datasets",
-            value: "1,248",
-          },
-          {
-            title: "Total Tables",
-            value: "5,678",
-          },
-          {
-            title: "Total Dashboards",
-            value: "234",
-          },
-          {
-            title: "Data Sources",
-            value: "18",
-          },
-        ].map((item) => (
+        {stats.map((item) => (
           <Grid item xs={12} md={3} key={item.title}>
             <Card
               sx={{
                 borderRadius: "14px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                boxShadow:
+                  "0px 1px 3px rgba(15, 23, 42, 0.08)",
               }}
             >
               <CardContent>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
                 >
-                  {item.title}
-                </Typography>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      color="#64748B"
+                    >
+                      {item.title}
+                    </Typography>
 
-                <Typography
-                  variant="h5"
-                  fontWeight={700}
-                  mt={1}
-                >
-                  {item.value}
-                </Typography>
+                    <Typography
+                      variant="h5"
+                      fontWeight={700}
+                      mt={1}
+                    >
+                      {item.value}
+                    </Typography>
+                  </Box>
+
+                  {item.icon}
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
@@ -196,15 +233,17 @@ const DataCatalogPage = () => {
       <Paper
         sx={{
           p: 2,
-          mb: 3,
+          mb: 2,
           borderRadius: "14px",
+          boxShadow:
+            "0px 1px 3px rgba(15, 23, 42, 0.08)",
         }}
       >
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <TextField
-              fullWidth
               size="small"
+              fullWidth
               placeholder="Search datasets..."
             />
           </Grid>
@@ -212,17 +251,16 @@ const DataCatalogPage = () => {
           <Grid item xs={12} md={2}>
             <TextField
               select
-              fullWidth
               size="small"
+              fullWidth
               defaultValue=""
               label="Domain"
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="">
+                All
+              </MenuItem>
               <MenuItem value="Finance">
                 Finance
-              </MenuItem>
-              <MenuItem value="Sales">
-                Sales
               </MenuItem>
             </TextField>
           </Grid>
@@ -230,17 +268,16 @@ const DataCatalogPage = () => {
           <Grid item xs={12} md={2}>
             <TextField
               select
-              fullWidth
               size="small"
+              fullWidth
               defaultValue=""
               label="Source"
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="">
+                All
+              </MenuItem>
               <MenuItem value="BigQuery">
                 BigQuery
-              </MenuItem>
-              <MenuItem value="Snowflake">
-                Snowflake
               </MenuItem>
             </TextField>
           </Grid>
@@ -250,17 +287,27 @@ const DataCatalogPage = () => {
       {/* TABLE */}
       <Paper
         sx={{
-          p: 2,
           borderRadius: "14px",
-          height: 600,
+          overflow: "hidden",
+          boxShadow:
+            "0px 1px 3px rgba(15, 23, 42, 0.08)",
         }}
       >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-        />
+        <Box sx={{ height: 550 }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            sx={{
+              border: 0,
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "#F8FAFC",
+                fontWeight: 700,
+              },
+            }}
+          />
+        </Box>
       </Paper>
     </Box>
   );
