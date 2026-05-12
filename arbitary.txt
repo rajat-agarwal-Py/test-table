@@ -1,0 +1,472 @@
+src/
+│
+├── pages/
+│   └── datacatalog/
+│       ├── DataCatalogPage.tsx
+│       ├── columns.tsx
+│       ├── components/
+│       │    ├── CatalogFilters.tsx
+│       │    ├── CatalogStats.tsx
+│       │    └── CatalogTable.tsx
+│
+├── data/
+│   └── catalogData.ts
+│
+├── types/
+│   └── catalog.ts
+
+
+1. types/catalog.ts
+
+export interface CatalogItem {
+  id: number;
+
+  fileType: string;
+
+  fileName: string;
+
+  description: string;
+
+  source: string;
+
+  sourceLink: string;
+
+  lastUpdated: string;
+}
+
+
+2. data/catalogData.ts
+import { CatalogItem } from "../types/catalog";
+
+export const catalogData: CatalogItem[] = [
+  {
+    id: 1,
+
+    fileType: "CSV",
+
+    fileName: "customer_sales",
+
+    description: "Sales data for all regions",
+
+    source: "BigQuery",
+
+    sourceLink: "https://console.cloud.google.com/bigquery",
+
+    lastUpdated: "23-12-2025",
+  },
+
+  {
+    id: 2,
+
+    fileType: "Excel",
+
+    fileName: "marketing_campaigns",
+
+    description: "Marketing campaign performance",
+
+    source: "BigQuery",
+
+    sourceLink: "https://console.cloud.google.com/bigquery",
+
+    lastUpdated: "20-12-2025",
+  },
+
+  {
+    id: 3,
+
+    fileType: "CSV",
+
+    fileName: "employee_master",
+
+    description: "HR and employee data",
+
+    source: "BigQuery",
+
+    sourceLink: "https://console.cloud.google.com/bigquery",
+
+    lastUpdated: "18-12-2025",
+  },
+];
+
+
+3. pages/datacatalog/columns.tsx
+import {
+  Avatar,
+  Box,
+  Chip,
+  Link,
+  Typography,
+} from "@mui/material";
+
+import { GridColDef } from "@mui/x-data-grid";
+
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+
+import LaunchIcon from "@mui/icons-material/Launch";
+
+export const columns: GridColDef[] = [
+  {
+    field: "fileName",
+
+    headerName: "File Name",
+
+    flex: 1.5,
+
+    sortable: false,
+
+    renderCell: (params) => {
+      const isCSV = params.row.fileType === "CSV";
+
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            height: "100%",
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 38,
+              height: 38,
+              bgcolor: isCSV ? "#E8F5E9" : "#E3F2FD",
+            }}
+          >
+            <InsertDriveFileOutlinedIcon
+              sx={{
+                color: isCSV ? "#2E7D32" : "#1565C0",
+              }}
+            />
+          </Avatar>
+
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
+              {params.row.fileName}
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                color: "#6B7280",
+              }}
+            >
+              {params.row.fileType} Dataset
+            </Typography>
+          </Box>
+        </Box>
+      );
+    },
+  },
+
+  {
+    field: "description",
+
+    headerName: "File Description",
+
+    flex: 2,
+
+    sortable: false,
+
+    renderCell: (params) => (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "#4B5563",
+        }}
+      >
+        {params.value}
+      </Typography>
+    ),
+  },
+
+  {
+    field: "source",
+
+    headerName: "Source",
+
+    flex: 1,
+
+    sortable: false,
+
+    renderCell: (params) => (
+      <Link
+        href={params.row.sourceLink}
+        target="_blank"
+        underline="none"
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "#2563EB",
+            fontWeight: 600,
+          }}
+        >
+          <LaunchIcon fontSize="small" />
+
+          <Typography variant="body2">
+            {params.value}
+          </Typography>
+        </Box>
+      </Link>
+    ),
+  },
+
+  {
+    field: "lastUpdated",
+
+    headerName: "Last Updated",
+
+    flex: 1,
+
+    sortable: false,
+
+    renderCell: (params) => (
+      <Chip
+        label={params.value}
+        size="small"
+        sx={{
+          backgroundColor: "#DCFCE7",
+          color: "#166534",
+          fontWeight: 600,
+          borderRadius: "8px",
+        }}
+      />
+    ),
+  },
+];
+4. pages/datacatalog/components/CatalogTable.tsx
+import { Box } from "@mui/material";
+
+import { DataGrid } from "@mui/x-data-grid";
+
+import { catalogData } from "../../../data/catalogData";
+
+import { columns } from "../columns";
+
+const CatalogTable = () => {
+  return (
+    <Box
+      sx={{
+        backgroundColor: "white",
+        borderRadius: "16px",
+        p: 2,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+      }}
+    >
+      <DataGrid
+        rows={catalogData}
+        columns={columns}
+        autoHeight
+        rowHeight={72}
+        pageSizeOptions={[5, 10]}
+        disableRowSelectionOnClick
+        hideFooterSelectedRowCount
+        sx={{
+          border: "none",
+
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#F9FAFB",
+            borderBottom: "1px solid #E5E7EB",
+            fontWeight: 700,
+          },
+
+          "& .MuiDataGrid-row": {
+            borderBottom: "1px solid #F3F4F6",
+          },
+
+          "& .MuiDataGrid-row:hover": {
+            backgroundColor: "#F9FAFB",
+          },
+
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+            display: "flex",
+            alignItems: "center",
+          },
+
+          "& .MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+
+          "& .MuiDataGrid-columnHeader:focus": {
+            outline: "none",
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+export default CatalogTable;
+5. pages/datacatalog/components/CatalogFilters.tsx
+import {
+  Box,
+  Button,
+  MenuItem,
+  TextField,
+} from "@mui/material";
+
+const CatalogFilters = () => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 2,
+        mb: 3,
+      }}
+    >
+      <TextField
+        placeholder="Search datasets..."
+        size="small"
+        sx={{
+          width: 300,
+        }}
+      />
+
+      <TextField
+        select
+        size="small"
+        defaultValue="All"
+        sx={{
+          width: 180,
+        }}
+      >
+        <MenuItem value="All">
+          All Types
+        </MenuItem>
+
+        <MenuItem value="CSV">
+          CSV
+        </MenuItem>
+
+        <MenuItem value="Excel">
+          Excel
+        </MenuItem>
+      </TextField>
+
+      <Button variant="contained">
+        Search
+      </Button>
+    </Box>
+  );
+};
+
+export default CatalogFilters;
+6. pages/datacatalog/components/CatalogStats.tsx
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+} from "@mui/material";
+
+const stats = [
+  {
+    title: "Total Datasets",
+    value: "1,248",
+  },
+
+  {
+    title: "CSV Files",
+    value: "856",
+  },
+
+  {
+    title: "Excel Files",
+    value: "214",
+  },
+
+  {
+    title: "BigQuery Tables",
+    value: "178",
+  },
+];
+
+const CatalogStats = () => {
+  return (
+    <Grid container spacing={2} mb={3}>
+      {stats.map((item) => (
+        <Grid size={{ xs: 12, md: 3 }} key={item.title}>
+          <Card
+            sx={{
+              borderRadius: "16px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                {item.title}
+              </Typography>
+
+              <Typography
+                variant="h5"
+                fontWeight={700}
+              >
+                {item.value}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
+
+export default CatalogStats;
+7. pages/datacatalog/DataCatalogPage.tsx
+import {
+  Box,
+  Typography,
+} from "@mui/material";
+
+import CatalogFilters from "./components/CatalogFilters";
+
+import CatalogStats from "./components/CatalogStats";
+
+import CatalogTable from "./components/CatalogTable";
+
+const DataCatalogPage = () => {
+  return (
+    <Box>
+      {/* PAGE TITLE */}
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        mb={1}
+      >
+        Data Catalog
+      </Typography>
+
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        mb={4}
+      >
+        Discover and explore datasets
+      </Typography>
+
+      {/* STATS */}
+      <CatalogStats />
+
+      {/* FILTERS */}
+      <CatalogFilters />
+
+      {/* TABLE */}
+      <CatalogTable />
+    </Box>
+  );
+};
+
+export default DataCatalogPage;
