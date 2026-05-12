@@ -1,0 +1,21 @@
+  renderHeaderFilter: (params) => (
+    <input
+      type="text"
+      placeholder="Search..."
+      style={{
+        width: "95%",
+        padding: "6px 8px",
+        borderRadius: "6px",
+        border: "1px solid #E5E7EB",
+        fontSize: "12px",
+        outline: "none",
+      }}
+      value={params.item.value ?? ""}
+      onChange={(event) =>
+        params.applyValue({
+          ...params.item,
+          value: event.target.value,
+        })
+      }
+    />
+  ),
