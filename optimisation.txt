@@ -1,0 +1,558 @@
+src/
+│
+├── components/
+│   └── loaders/
+│       └── CatalogSkeleton.tsx
+│
+├── hooks/
+│   └── useCatalog.ts
+│
+├── services/
+│   └── catalogService.ts
+│
+├── pages/
+│   └── datacatalog/
+│       ├── DataCatalogPage.tsx
+│       ├── columns.tsx
+│       │
+│       ├── components/
+│       │    ├── CatalogFilters.tsx
+│       │    ├── CatalogStats.tsx
+│       │    └── CatalogTable.tsx
+│
+├── types/
+│   └── catalog.ts
+│
+├── main.tsx
+
+
+
+npm install axios
+npm install @tanstack/react-query
+npm install use-debounce
+
+
+
+
+
+
+src/services/catalogService.ts
+
+import axios from "axios";
+
+// API URL
+const API_URL =
+  "https://your-api-url.com/catalog";
+
+// FETCH FUNCTION
+export const fetchCatalog = async () => {
+  // MOCK DELAY
+  await new Promise((resolve) =>
+    setTimeout(resolve, 1200)
+  );
+
+  // MOCK RESPONSE
+  return [
+    {
+      id: 1,
+
+      fileType: "CSV",
+
+      fileName: "customer_sales",
+
+      description:
+        "Sales data for all regions",
+
+      source: "BigQuery",
+
+      sourceLink:
+        "https://console.cloud.google.com/bigquery",
+
+      lastUpdated: "23-12-2025",
+
+      rows: 125000,
+
+      columns: 10,
+
+      lastMonthIngested:
+        "18-12-2025",
+    },
+
+    {
+      id: 2,
+
+      fileType: "Excel",
+
+      fileName:
+        "marketing_campaigns",
+
+      description:
+        "Marketing performance data",
+
+      source: "BigQuery",
+
+      sourceLink:
+        "https://console.cloud.google.com/bigquery",
+
+      lastUpdated: "20-12-2025",
+
+      rows: 5000,
+
+      columns: 8,
+
+      lastMonthIngested:
+        "18-12-2025",
+    },
+  ];
+
+  // REAL API
+  // const response = await axios.get(
+  //   API_URL,
+  //   {
+  //     timeout: 10000,
+  //   }
+  // );
+
+  // return response.data;
+};
+
+
+2. ADD
+src/hooks/useCatalog.ts
+
+
+import { useQuery } from "@tanstack/react-query";
+
+import { useMemo } from "react";
+
+import { fetchCatalog } from "../services/catalogService";
+
+export const useCatalog = () => {
+  const query = useQuery({
+    queryKey: ["catalog"],
+
+    queryFn: fetchCatalog,
+
+    staleTime: 1000 * 60 * 10,
+
+    gcTime: 1000 * 60 * 30,
+
+    retry: 2,
+
+    refetchOnWindowFocus: false,
+  });
+
+  // MEMOIZED ROWS
+  const rows = useMemo(() => {
+    return query.data || [];
+  }, [query.data]);
+
+  return {
+    rows,
+
+    isLoading: query.isLoading,
+
+    error: query.error,
+  };
+};
+
+
+3. ADD
+src/components/loaders/CatalogSkeleton.tsx
+
+//Avoid blank screen while loading. 
+import {
+  Box,
+  Skeleton,
+} from "@mui/material";
+
+const CatalogSkeleton = () => {
+  return (
+    <Box>
+      {[1, 2, 3, 4, 5].map((item) => (
+        <Skeleton
+          key={item}
+          variant="rounded"
+          height={60}
+          sx={{
+            mb: 1,
+            borderRadius: "12px",
+          }}
+        />
+      ))}
+    </Box>
+  );
+};
+
+export default CatalogSkeleton;
+
+
+4. UPDATE
+src/types/catalog.ts
+//WHY?
+
+ // Your API now returns more fields.
+
+// CODE
+export interface CatalogItem {
+  id: number;
+
+  fileType: string;
+
+  fileName: string;
+
+  description: string;
+
+  source: string;
+
+  sourceLink: string;
+
+  lastUpdated: string;
+
+  rows: number;
+
+  columns: number;
+
+  lastMonthIngested: string;
+}
+
+
+5. UPDATE
+src/pages/datacatalog/components/CatalogFilters.tsx
+
+//Now search is controlled and optimized. 
+
+import {
+  Box,
+  TextField,
+} from "@mui/material";
+
+interface Props {
+  search: string;
+
+  setSearch: (
+    value: string
+  ) => void;
+}
+
+const CatalogFilters = ({
+  search,
+  setSearch,
+}: Props) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 2,
+        mb: 3,
+      }}
+    >
+      <TextField
+        placeholder="Search datasets..."
+        size="small"
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        sx={{
+          width: 300,
+        }}
+      />
+    </Box>
+  );
+};
+
+export default CatalogFilters;
+
+
+
+6. UPDATE
+src/pages/datacatalog/components/CatalogTable.tsx
+WHY?
+
+Optimized rendering + loading states.
+
+import { Box } from "@mui/material";
+
+import { DataGrid } from "@mui/x-data-grid";
+
+import { memo } from "react";
+
+import { columns } from "../columns";
+
+interface Props {
+  rows: any[];
+
+  loading: boolean;
+}
+
+const CatalogTable = ({
+  rows,
+  loading,
+}: Props) => {
+  return (
+    <Box
+      sx={{
+        height: 650,
+
+        backgroundColor: "white",
+
+        borderRadius: "16px",
+
+        p: 2,
+
+        border:
+          "1px solid #E5E7EB",
+
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.08)",
+      }}
+    >
+      <DataGrid
+        rows={rows}
+
+        columns={columns}
+
+        loading={loading}
+
+        rowHeight={56}
+
+        pagination
+
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 5,
+            },
+          },
+        }}
+
+        pageSizeOptions={[5, 10, 25, 50]}
+
+        disableRowSelectionOnClick
+
+        hideFooterSelectedRowCount
+
+        showToolbar
+
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+
+            quickFilterProps: {
+              debounceMs: 500,
+            },
+          },
+        }}
+
+        sx={{
+          border: "none",
+
+          "& .MuiDataGrid-columnHeaders":
+            {
+              backgroundColor:
+                "#F1F5F9",
+
+              borderBottom:
+                "1px solid #E5E7EB",
+
+              position: "sticky",
+
+              top: 0,
+
+              zIndex: 1,
+            },
+
+          "& .MuiDataGrid-row": {
+            borderBottom:
+              "1px solid #F3F4F6",
+          },
+
+          "& .MuiDataGrid-row:hover":
+            {
+              backgroundColor:
+                "#F9FAFB",
+            },
+
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+
+            display: "flex",
+
+            alignItems: "center",
+          },
+
+          "& .MuiDataGrid-cell:focus":
+            {
+              outline: "none",
+            },
+
+          "& .MuiDataGrid-columnHeader:focus":
+            {
+              outline: "none",
+            },
+        }}
+      />
+    </Box>
+  );
+};
+
+export default memo(CatalogTable);
+
+7. UPDATE
+src/pages/datacatalog/DataCatalogPage.tsx
+
+
+import {
+  Alert,
+  Box,
+  Typography,
+} from "@mui/material";
+
+import {
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+
+import { useDebounce } from "use-debounce";
+
+import CatalogFilters from "./components/CatalogFilters";
+
+import CatalogStats from "./components/CatalogStats";
+
+import CatalogTable from "./components/CatalogTable";
+
+import CatalogSkeleton from "../../components/loaders/CatalogSkeleton";
+
+import { useCatalog } from "../../hooks/useCatalog";
+
+const DataCatalogPage = () => {
+  const [search, setSearch] =
+    useState("");
+
+  // DEBOUNCED SEARCH
+  const [debouncedSearch] =
+    useDebounce(search, 500);
+
+  // FETCH API DATA
+  const {
+    rows,
+    isLoading,
+    error,
+  } = useCatalog();
+
+  // FILTERED ROWS
+  const filteredRows = useMemo(() => {
+    return rows.filter((item) => {
+      return (
+        item.fileName
+          .toLowerCase()
+          .includes(
+            debouncedSearch.toLowerCase()
+          ) ||
+
+        item.description
+          .toLowerCase()
+          .includes(
+            debouncedSearch.toLowerCase()
+          )
+      );
+    });
+  }, [rows, debouncedSearch]);
+
+  // MEMOIZED HANDLER
+  const handleSearch =
+    useCallback((value: string) => {
+      setSearch(value);
+    }, []);
+
+  if (isLoading) {
+    return <CatalogSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error">
+        Failed to load catalog
+      </Alert>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        background:
+          "linear-gradient(to bottom right, #EEF2FF, #F8FAFC)",
+
+        minHeight: "100vh",
+
+        p: 3,
+      }}
+    >
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        mb={1}
+      >
+        Data Catalog
+      </Typography>
+
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        mb={2}
+      >
+        Discover and explore datasets
+      </Typography>
+
+      <CatalogStats />
+
+      <CatalogFilters
+        search={search}
+        setSearch={handleSearch}
+      />
+
+      <CatalogTable
+        rows={filteredRows}
+        loading={isLoading}
+      />
+    </Box>
+  );
+};
+
+export default DataCatalogPage;
+
+8. UPDATE
+src/main.tsx 
+
+
+import React from "react";
+
+import ReactDOM from "react-dom/client";
+
+import { BrowserRouter } from "react-router-dom";
+
+import {
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+
+import App from "./App";
+
+const queryClient =
+  new QueryClient();
+
+ReactDOM.createRoot(
+  document.getElementById("root")!
+).render(
+  <React.StrictMode>
+    <QueryClientProvider
+      client={queryClient}
+    >
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </React.StrictMode>
+);
