@@ -556,3 +556,45 @@ ReactDOM.createRoot(
     </QueryClientProvider>
   </React.StrictMode>
 );
+
+
+
+adding a column
+1. UPDATE TYPE
+src/types/catalog.ts
+
+Add:
+startMonthIngested: string;
+2. UPDATE SERVICE DATA
+catalogService.ts
+3. ADD COLUMN IN columns.tsx
+
+{
+  field: "startMonthIngested",
+
+  headerName: "Start Month Ingested",
+
+  flex: 1.3,
+
+  sortable: true,
+
+  renderCell: (params) => (
+    <Chip
+      label={params.value}
+
+      size="small"
+
+      sx={{
+        backgroundColor: "#DBEAFE",
+
+        color: "#1D4ED8",
+
+        fontWeight: 600,
+
+        borderRadius: "8px",
+
+        fontSize: "11px",
+      }}
+    />
+  ),
+},
