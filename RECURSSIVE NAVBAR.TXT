@@ -1,0 +1,259 @@
+src/
+├── components/
+│   └── navbar/
+│       ├── Navbar.tsx                ← UPDATE
+│       ├── RecursiveMenuItem.tsx    ← ADD
+│       └── NavbarSkeleton.tsx       ← ADD
+│
+├── hooks/
+│   └── useMenu.ts                   ← ADD
+│
+├── services/
+│   └── menu.service.ts              ← ADD
+│
+├── mock/
+│   └── menu.mock.ts                 ← ADD
+│
+├── types/
+│   └── menu.types.ts                ← ADD
+
+
+
+1. ADD types/menu.types.ts
+
+export type MenuNode = {
+  id: number;
+
+  name: string;
+
+  dashboardId?: number;
+
+  children?: MenuNode[];
+}; 
+
+2. ADD mock/menu.mock.ts
+
+import { MenuNode } from "../types/menu.types";
+
+export const menuMockData: MenuNode[] = [
+  {
+    id: 1,
+    name: "MAML",
+
+    children: [
+      {
+        id: 2,
+        name: "Finance",
+
+        children: [
+          {
+            id: 3,
+            name: "Revenue Dashboard",
+            dashboardId: 101,
+          },
+
+          {
+            id: 4,
+            name: "Cost Dashboard",
+            dashboardId: 102,
+          },
+        ],
+      },
+
+      {
+        id: 5,
+        name: "HR",
+
+        children: [
+          {
+            id: 6,
+            name: "Employee Dashboard",
+            dashboardId: 103,
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 7,
+    name: "MIDAS",
+
+    children: [
+      {
+        id: 8,
+        name: "Analytics",
+
+        children: [
+          {
+            id: 9,
+            name: "Sales Dashboard",
+            dashboardId: 201,
+          },
+        ],
+      },
+    ],
+  },
+];
+
+
+3. ADD services/menu.service.ts
+
+import { menuMockData } from "../mock/menu.mock";
+
+export async function fetchMenu() {
+  try {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(menuMockData);
+      }, 700);
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
+4. ADD hooks/useMenu.ts
+
+import { useEffect, useState, useCallback } from "react";
+
+import { fetchMenu } from "../services/menu.service";
+
+import { MenuNode } from "../types/menu.types";
+
+export function useMenu() {
+  const [menu, setMenu] = useState<MenuNode[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+  const loadMenu = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const data = await fetchMenu();
+
+      setMenu(data as MenuNode[]);
+    } catch {
+      setError("Failed to load menu");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMenu();
+  }, [loadMenu]);
+
+  return {
+    menu,
+    loading,
+    error,
+  };
+}
+
+
+5. ADD RecursiveMenuItem.tsx 
+
+
+import React, { memo } from "react";
+
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+
+import { useNavigate } from "react-router-dom";
+
+import { MenuNode } from "../../types/menu.types";
+
+type Props = {
+  item: MenuNode;
+};
+
+function RecursiveMenuItemComponent({
+  item,
+}: Props) {
+  const navigate = useNavigate();
+
+  const isDashboard = !!item.dashboardId;
+
+  if (isDashboard) {
+    return (
+      <MenuItem
+        onClick={() =>
+          navigate(`/dashboard/${item.dashboardId}`)
+        }
+      >
+        {item.name}
+      </MenuItem>
+    );
+  }
+
+  return (
+    <>
+      <MenuItem>{item.name}</MenuItem>
+
+      {item.children?.map((child) => (
+        <RecursiveMenuItem
+          key={child.id}
+          item={child}
+        />
+      ))}
+    </>
+  );
+}
+
+export const RecursiveMenuItem = memo(
+  RecursiveMenuItemComponent
+);
+
+
+6. UPDATE Navbar.tsx 
+REMOVE:
+
+<Button onClick={() => navigate("/mamls")}>
+REMOVE ALL HARDCODED BUTTONS.
+
+ADD:
+
+import {
+  Button,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+
+Then:
+
+const { menu, loading } = useMenu();
+
+Then replace hardcoded navbar buttons with:
+
+{menu.map((module) => (
+  <Button key={module.id} color="inherit">
+    {module.name}
+  </Button>
+))}
+
+7. UPDATE AppRoutes.tsx
+
+REMOVE:
+
+<Route path="/mamls" />
+<Route path="/midas" /> 
+
+
+<Route
+  path="/dashboard/:id"
+  element={<DashboardPage />}
+/>
+8. ADD DashboardPage.tsx
+
+import { useParams } from "react-router-dom";
+
+const DashboardPage = () => {
+  const { id } = useParams();
+
+  return <div>Dashboard ID: {id}</div>;
+};
+
+export default DashboardPage;
