@@ -308,6 +308,17 @@ const CatalogTable = ({
           "0 1px 3px rgba(0,0,0,0.08)",
       }}
     >
+<Box
+  sx={{
+    overflowX: "auto",
+  }}
+>
+  <Box
+    sx={{
+      minWidth: "1600px",
+    }}
+  >
+    <DataGrid
       <DataGrid
         rows={rows}
 
@@ -315,7 +326,7 @@ const CatalogTable = ({
 
         loading={loading}
 
-        rowHeight={56}
+        getRowHeight={()=> "auto"}
 
         pagination
 
@@ -393,6 +404,8 @@ const CatalogTable = ({
             },
         }}
       />
+    </Box>
+    </Box>
     </Box>
   );
 };
